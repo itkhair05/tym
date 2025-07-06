@@ -12,7 +12,7 @@ from datetime import datetime, timedelta
 app = Flask(__name__, static_folder='.', static_url_path='')
 
 # ✅ Chỉnh CORS cho phép từ mọi domain (hoặc cấu hình cụ thể origin nếu muốn)
-CORS(app, resources={r"/*": {"origins": "*"}})
+CORS(app, origins=["https://tym-love-univers.onrender.com"])
 
 TOKEN_FILE = 'tokens.json'
 
