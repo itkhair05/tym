@@ -82,29 +82,28 @@
       document.getElementById('qr-code').innerHTML = '';
 
       try {
-        const response = await fetch(`/generate-qr`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ url })
-        });
-        // Kiểm tra nếu không phải JSON (trả về HTML)
-  const contentType = response.headers.get("content-type");
-  if (!response.ok || !contentType || !contentType.includes("application/json")) {
-    throw new Error("Server trả về nội dung không hợp lệ (không phải JSON)");
-  }
-        const data = await response.json();
-        
-        document.getElementById('loading').style.display = 'none';
-        
-        document.getElementById('qr-code').innerHTML = `
-          <img src="${data.qr}" alt="Mã QR">
-          <div class="qr-success">Thông điệp của bạn đã sẵn sàng! 💕</div>
-        `;
-      } catch (error) {
-        console.error('Lỗi tạo mã QR:', error);
-        document.getElementById('loading').style.display = 'none';
-        document.getElementById('qr-code').innerHTML = '<p style="color: #ff6b6b; font-family: \'Great Vibes\', cursive; font-size: 1.2em;">Rất tiếc! Có lỗi xảy ra. Vui lòng thử lại 💔</p>';
-      }
+  const response = await fetch(`https://tym-love-univers.onrender.com/generate-qr`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ url })
+  });
+
+  const text = await response.text(); // lấy dạng text trước
+  console.log("📦 Raw response:", text);
+
+  const data = JSON.parse(text); // tự parse để dễ debug
+
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('qr-code').innerHTML = `
+    <img src="${data.qr}" alt="Mã QR">
+    <div class="qr-success">Thông điệp của bạn đã sẵn sàng! 💕</div>
+  `;
+} catch (error) {
+  console.error('Lỗi tạo mã QR:', error);
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('qr-code').innerHTML = '<p style="color: #ff6b6b; font-family: \'Great Vibes\', cursive; font-size: 1.2em;">Rất tiếc! Có lỗi xảy ra. Vui lòng thử lại 💔</p>';
+}
+
     }
 
     document.addEventListener('DOMContentLoaded', function() {

@@ -34,34 +34,39 @@ def heart():
 
 @app.route('/generate-qr', methods=['POST'])
 def generate_qr():
-    data = request.get_json()
-    url = data.get('url')
-    print("📦 URL nhận:", url)
+    try:
+        data = request.get_json()
+        if not data or 'url' not in data:
+            return jsonify({'error': 'Thiếu URL'}), 400
 
-    # Tạo token hết hạn sau 1 giờ
-    token = generate_token()
-    expire_at = (datetime.utcnow() + timedelta(hours=1)).timestamp()
+        url = data['url']
+        print("📦 Nhận URL:", url)
 
-    # Lưu token vào file
-    tokens = load_tokens()
-    tokens[token] = {"url": url, "expire": expire_at}
-    save_tokens(tokens)
+        token = generate_token()
+        expire_at = (datetime.utcnow() + timedelta(hours=1)).timestamp()
 
-    # Tạo link token
-    full_link = request.host_url.rstrip('/') + f'/qr/{token}'
-    print("🔗 Link token:", full_link)
+        tokens = load_tokens()
+        tokens[token] = {"url": url, "expire": expire_at}
+        save_tokens(tokens)
 
-    # Tạo QR code
-    qr = qrcode.QRCode(version=1, box_size=10, border=4)
-    qr.add_data(full_link)
-    qr.make(fit=True)
+        full_link = request.host_url.rstrip('/') + f'/qr/{token}'
+        print("🔗 Link QR:", full_link)
 
-    img = qr.make_image(fill_color="black", back_color="white")
-    buffered = BytesIO()
-    img.save(buffered, format="PNG")
-    img_str = base64.b64encode(buffered.getvalue()).decode('utf-8')
+        qr = qrcode.QRCode(version=1, box_size=10, border=4)
+        qr.add_data(full_link)
+        qr.make(fit=True)
 
-    return jsonify({'qr': f'data:image/png;base64,{img_str}'})
+        img = qr.make_image(fill_color="black", back_color="white")
+        buffered = BytesIO()
+        img.save(buffered, format="PNG")
+        img_str = base64.b64encode(buffered.getvalue()).decode('utf-8')
+
+        return jsonify({'qr': f'data:image/png;base64,{img_str}'})
+    
+    except Exception as e:
+        print("❌ Lỗi tạo QR:", str(e))
+        return jsonify({'error': 'Lỗi server khi tạo QR'}), 500
+
 
 @app.route('/qr/<token>')
 def access_qr(token):
