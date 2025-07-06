@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Tạo Thông Điệp Tình Yêu Vũ Trụ</title>
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Poppins:wght@300;400;600;700&family=Great+Vibes&family=Dancing+Script:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/style/input.css" />
+</head>
+<body>
+  <div class="cosmic-bg">
+    <div class="stars"></div>
+    <div class="heart-glow"></div>
+    <div class="floating-hearts">
+      <div class="floating-heart" style="left: 10%; animation-delay: 0s;">💕</div>
+      <div class="floating-heart" style="left: 20%; animation-delay: 2s;">💖</div>
+      <div class="floating-heart" style="left: 30%; animation-delay: 4s;">💝</div>
+      <div class="floating-heart" style="left: 40%; animation-delay: 6s;">💗</div>
+      <div class="floating-heart" style="left: 50%; animation-delay: 8s;">💕</div>
+      <div class="floating-heart" style="left: 60%; animation-delay: 1s;">💖</div>
+      <div class="floating-heart" style="left: 70%; animation-delay: 3s;">💝</div>
+      <div class="floating-heart" style="left: 80%; animation-delay: 5s;">💗</div>
+      <div class="floating-heart" style="left: 90%; animation-delay: 7s;">💕</div>
+    </div>
+  </div>
+
+  <div class="container">
+    <h1>Tạo Thông Điệp Tình Yêu Vũ Trụ</h1>
+    <p class="subtitle">Nơi tình yêu chạm đến các vì sao ✨</p>
+    <p class="love-quote">"Ở mọi vũ trụ, mọi dòng thời gian, anh luôn chọn em"</p>
+    
+    <div class="form-group">
+      <label for="music">Chọn bản nhạc tình yêu:</label>
+      <select id="music" name="music">
+        <option value="/style/phepmau.mp3">🌧️ Phép màu</option>
+      </select>
+    </div>
+    
+    <div class="form-group">
+      <label for="mainText">Thông điệp chính:</label>
+      <input type="text" id="mainText" name="mainText" placeholder="Anh yêu em ở mọi vũ trụ 💫" maxlength="100">
+    </div>
+    
+    <div class="form-group">
+      <label for="subText">Thông điệp phụ:</label>
+      <input type="text" id="subText" name="subText" placeholder="Dù ở vũ trụ nào, anh vẫn yêu em 💖" maxlength="200">
+    </div>
+    
+    <div class="form-group">
+      <label for="messages">Tin nhắn bay xuống:</label>
+      <textarea id="messages" name="messages" rows="5" placeholder="Nụ cười em thắp sáng thế giới của anh ✨
+    Mỗi nhịp tim gọi tên em 💕
+    Em là mãi mãi của anh 💖
+    Trong ánh mắt em, anh thấy mái nhà 🏠
+    Chúng ta viết nên chuyện tình yêu của riêng mình 📖"></textarea>
+    </div>
+    
+    <button class="generate-btn" onclick="generateQR()">Tạo Mã QR Tình Yêu</button>
+    
+    <div class="loading" id="loading">
+      <div class="spinner"></div>
+      <p style="margin-top: 10px; font-family: 'Great Vibes', cursive; font-size: 1.2em;">Đang kết nối tình yêu vào vũ trụ...</p>
+    </div>
+    
+    <div id="qr-code" class="qr-container"></div>
+  </div>
+
+  <script>
+    async function generateQR() {
+      const music = document.getElementById('music').value;
+      const mainText = encodeURIComponent(document.getElementById('mainText').value || 'Anh yêu em ở mọi vũ trụ');
+      const subText = encodeURIComponent(document.getElementById('subText').value || 'Dù ở vũ trụ nào, anh vẫn yêu em');
+      const messagesInput = document.getElementById('messages').value.split('\n').filter(m => m.trim()).slice(0, 5);
+      const messages = encodeURIComponent(messagesInput.join('|'));
+
+      const url = `${window.location.origin}/heart.html?music=${encodeURIComponent(music)}&mainText=${mainText}&subText=${subText}&messages=${messages}`;
+
+      
+      console.log("🔗 URL trong mã QR:", url);
+
+      document.getElementById('loading').style.display = 'block';
+      document.getElementById('qr-code').innerHTML = '';
+
+      try {
+        const response = await fetch(`${window.location.origin}/generate-qr`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url })
+        });
+        const data = await response.json();
+        
+        document.getElementById('loading').style.display = 'none';
+        
+        document.getElementById('qr-code').innerHTML = `
+          <img src="${data.qr}" alt="Mã QR">
+          <div class="qr-success">Thông điệp của bạn đã sẵn sàng! 💕</div>
+        `;
+      } catch (error) {
+        console.error('Lỗi tạo mã QR:', error);
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('qr-code').innerHTML = '<p style="color: #ff6b6b; font-family: \'Great Vibes\', cursive; font-size: 1.2em;">Rất tiếc! Có lỗi xảy ra. Vui lòng thử lại 💔</p>';
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      const formElements = document.querySelectorAll('input, textarea, select');
+      formElements.forEach(element => {
+        element.addEventListener('focus', function() {
+          this.style.transform = 'translateY(-2px)';
+        });
+        
+        element.addEventListener('blur', function() {
+          this.style.transform = 'translateY(0)';
+        });
+      });
+    });
+  </script>
+</body>
+</html>
