@@ -12,7 +12,7 @@ from datetime import datetime, timedelta
 app = Flask(__name__, static_folder='.', static_url_path='')
 
 # ✅ Chỉnh CORS cho phép từ mọi domain (hoặc cấu hình cụ thể origin nếu muốn)
-CORS(app, origins=["https://tym-love-univers.onrender.com"])
+CORS(app, resources={r"/*": {"origins": "https://tym-love-univers.onrender.com"}})
 
 TOKEN_FILE = 'tokens.json'
 
@@ -83,4 +83,5 @@ def access_qr(token):
     return redirect(entry['url'])
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=10000)
+    port = int(os.environ.get("PORT", 10000))
+    app.run(host='0.0.0.0', port=port)
