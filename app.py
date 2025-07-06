@@ -1,11 +1,13 @@
-from flask import Flask, render_template, request, jsonify, redirect, url_for
+from flask import Flask, render_template, request, jsonify, redirect
 from flask_cors import CORS
 import qrcode, base64, string, random, json, os
 from io import BytesIO
 from datetime import datetime, timedelta
 
-app = Flask(__name__)
-CORS(app)
+app = Flask(__name__, static_folder='static', template_folder='templates')
+
+# ✅ Chỉ cho phép CORS từ domain web chính
+CORS(app, origins=["https://tym-love-univers.onrender.com"])
 
 TOKEN_FILE = 'tokens.json'
 
@@ -34,18 +36,22 @@ def heart():
 def generate_qr():
     data = request.get_json()
     url = data.get('url')
-    print("📦 Received URL:", url)
+    print("📦 URL nhận:", url)
 
+    # Tạo token hết hạn sau 1 giờ
     token = generate_token()
     expire_at = (datetime.utcnow() + timedelta(hours=1)).timestamp()
 
+    # Lưu token vào file
     tokens = load_tokens()
     tokens[token] = {"url": url, "expire": expire_at}
     save_tokens(tokens)
 
-    full_link = request.host_url + f'qr/{token}'
-    print("🔗 Token link:", full_link)
+    # Tạo link token
+    full_link = request.host_url.rstrip('/') + f'/qr/{token}'
+    print("🔗 Link token:", full_link)
 
+    # Tạo QR code
     qr = qrcode.QRCode(version=1, box_size=10, border=4)
     qr.add_data(full_link)
     qr.make(fit=True)

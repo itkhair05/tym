@@ -87,6 +87,11 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ url })
         });
+        // Kiểm tra nếu không phải JSON (trả về HTML)
+  const contentType = response.headers.get("content-type");
+  if (!response.ok || !contentType || !contentType.includes("application/json")) {
+    throw new Error("Server trả về nội dung không hợp lệ (không phải JSON)");
+  }
         const data = await response.json();
         
         document.getElementById('loading').style.display = 'none';
