@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify, send_from_directory, redirect
-from flask_cors import CORS
+from flask_cors import CORS  # ✅ Đã dùng CORS
 import qrcode
 import base64
 import string
@@ -10,7 +10,9 @@ from io import BytesIO
 from datetime import datetime, timedelta
 
 app = Flask(__name__, static_folder='.', static_url_path='')
-CORS(app)
+
+# ✅ Chỉnh CORS cho phép từ mọi domain (hoặc cấu hình cụ thể origin nếu muốn)
+CORS(app, resources={r"/*": {"origins": "*"}})
 
 TOKEN_FILE = 'tokens.json'
 
