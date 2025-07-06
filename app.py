@@ -36,7 +36,10 @@ def heart():
 def generate_qr():
     try:
         data = request.get_json()
+        print("🧾 JSON nhận được:", data)
+
         if not data or 'url' not in data:
+            print("❗ Thiếu trường 'url'")
             return jsonify({'error': 'Thiếu URL'}), 400
 
         url = data['url']
@@ -66,6 +69,7 @@ def generate_qr():
     except Exception as e:
         print("❌ Lỗi tạo QR:", str(e))
         return jsonify({'error': 'Lỗi server khi tạo QR'}), 500
+
 
 
 @app.route('/qr/<token>')
