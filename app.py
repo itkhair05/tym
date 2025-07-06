@@ -1,26 +1,17 @@
-from flask import Flask, request, jsonify, send_from_directory, redirect
-from flask_cors import CORS  # ✅ Đã dùng CORS
-import qrcode
-import base64
-import string
-import random
-import json
-import os
+from flask import Flask, render_template, request, jsonify, redirect, url_for
+from flask_cors import CORS
+import qrcode, base64, string, random, json, os
 from io import BytesIO
 from datetime import datetime, timedelta
 
-app = Flask(__name__, static_folder='.', static_url_path='')
-
-# ✅ Chỉnh CORS cho phép từ mọi domain (hoặc cấu hình cụ thể origin nếu muốn)
-CORS(app, resources={r"/*": {"origins": "https://tym-love-univers.onrender.com"}})
+app = Flask(__name__)
+CORS(app)
 
 TOKEN_FILE = 'tokens.json'
 
-# Tạo token ngẫu nhiên
 def generate_token(length=10):
     return ''.join(random.choices(string.ascii_letters + string.digits, k=length))
 
-# Tải hoặc khởi tạo file token
 def load_tokens():
     if os.path.exists(TOKEN_FILE):
         with open(TOKEN_FILE, 'r') as f:
@@ -33,11 +24,11 @@ def save_tokens(tokens):
 
 @app.route('/')
 def index():
-    return send_from_directory('.', 'index.html')
+    return render_template('index.html')
 
 @app.route('/heart.html')
 def heart():
-    return send_from_directory('.', 'heart.html')
+    return render_template('heart.html')
 
 @app.route('/generate-qr', methods=['POST'])
 def generate_qr():
@@ -45,16 +36,13 @@ def generate_qr():
     url = data.get('url')
     print("📦 Received URL:", url)
 
-    # Tạo token và thời gian hết hạn sau 1 giờ
     token = generate_token()
     expire_at = (datetime.utcnow() + timedelta(hours=1)).timestamp()
 
-    # Lưu token
     tokens = load_tokens()
     tokens[token] = {"url": url, "expire": expire_at}
     save_tokens(tokens)
 
-    # Tạo QR code trỏ đến đường dẫn chứa token
     full_link = request.host_url + f'qr/{token}'
     print("🔗 Token link:", full_link)
 
@@ -76,12 +64,10 @@ def access_qr(token):
 
     if not entry:
         return "❌ Liên kết không tồn tại hoặc đã bị xóa.", 404
-
     if datetime.utcnow().timestamp() > entry['expire']:
         return "⚠️ QR đã hết hạn sau 1 giờ.", 403
 
     return redirect(entry['url'])
 
 if __name__ == '__main__':
-    port = int(os.environ.get("PORT", 10000))
-    app.run(host='0.0.0.0', port=port)
+    app.run(host='0.0.0.0', port=10000)
