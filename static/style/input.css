@@ -281,16 +281,6 @@
       100% { background-position: 0% 50%; }
     }
 
-    .generate-btn::before {
-      content: '💖';
-      position: absolute;
-      left: 15px;
-      top: 50%;
-      transform: translateY(-50%);
-      font-size: 1.2em;
-      animation: heartPulse 1.5s infinite;
-    }
-
     .generate-btn::after {
       content: '';
       position: absolute;

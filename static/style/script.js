@@ -5,7 +5,9 @@ const subtitle = document.getElementById("subtitle");
 
 // Parse query parameters
 const urlParams = new URLSearchParams(window.location.search);
-const selectedMusic = urlParams.get('music') || './style/phepmau.mp3';
+const selectedMusic = urlParams.get('music') || '/static/style/phepmau.mp3';
+const mainText = urlParams.get('mainText') || 'I love you in every universe';
+const subText = urlParams.get('subText') || 'Anh yêu em...Cho dù ở vũ trụ nào anh vẫn yêu em';
 const customMessages = urlParams.get('messages') ? urlParams.get('messages').split('|') : [
   "Em là vũ trụ của anh",
   "Tình yêu bất tận giữa các vì sao",
@@ -13,20 +15,19 @@ const customMessages = urlParams.get('messages') ? urlParams.get('messages').spl
   "Anh tỏa sáng là vì em",
   "Em thật tỏa sáng trên bầu trời của anh"
 ];
-const mainText = urlParams.get('mainText') || 'I love you in every universe';
-const subText = urlParams.get('subText') || 'Anh yêu em...Cho dù ở vũ trụ nào anh vẫn yêu em';
-
-// Apply user selections
-musicSource.src = selectedMusic;
+// Set main & sub text
 mainMessage.textContent = mainText;
 subtitle.textContent = subText;
 
+// 🎵 Set up music
+musicSource.src = selectedMusic;
+music.load(); // 🆕 Quan trọng để cập nhật nhạc mới
+
 const playMusicOnce = () => {
-  music.play().catch(e => console.log("Music play blocked:", e));
+  music.play().catch(e => console.log("🎧 Music play blocked:", e));
   window.removeEventListener("click", playMusicOnce);
 };
-
-window.addEventListener("click", playMusicOnce);
+window.addEventListener("click", playMusicOnce); // Yêu cầu người dùng click mới được phát do chính sách trình duyệt
 
 const messages = customMessages;
 const fallingTexts = [];

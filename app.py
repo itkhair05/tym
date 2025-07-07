@@ -46,11 +46,11 @@ def generate_qr():
         print("📦 Nhận URL:", url)
 
         token = generate_token()
-        expire_at = (datetime.utcnow() + timedelta(hours=1)).timestamp()
-
+        expire_at = (datetime.utcnow() + timedelta(minutes=15)).timestamp()  # ⏱️ 15 phút
         tokens = load_tokens()
         tokens[token] = {"url": url, "expire": expire_at}
         save_tokens(tokens)
+
 
         full_link = request.host_url.rstrip('/') + f'/qr/{token}'
         print("🔗 Link QR:", full_link)
@@ -71,7 +71,6 @@ def generate_qr():
         return jsonify({'error': 'Lỗi server khi tạo QR'}), 500
 
 
-
 @app.route('/qr/<token>')
 def access_qr(token):
     tokens = load_tokens()
@@ -80,7 +79,7 @@ def access_qr(token):
     if not entry:
         return "❌ Liên kết không tồn tại hoặc đã bị xóa.", 404
     if datetime.utcnow().timestamp() > entry['expire']:
-        return "⚠️ QR đã hết hạn sau 1 giờ.", 403
+        return "⚠️ QR đã hết hạn sau 15p hãy tạo lại cái mới nhe ngừi đẹp 💗.", 403
 
     return redirect(entry['url'])
 
