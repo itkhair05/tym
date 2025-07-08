@@ -44,7 +44,7 @@ body {
 .subtitle {
   font-size: clamp(12px, 2vw, 16px);
   margin-top: 10px;
-  color: #fff;
+  color: #ffb6c1;
   font-style: italic;
   text-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
 }

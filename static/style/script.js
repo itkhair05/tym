@@ -6,28 +6,39 @@ const subtitle = document.getElementById("subtitle");
 // Parse query parameters
 const urlParams = new URLSearchParams(window.location.search);
 const selectedMusic = urlParams.get('music') || '/static/style/phepmau.mp3';
-const mainText = urlParams.get('mainText') || 'I love you in every universe';
-const subText = urlParams.get('subText') || 'Anh yêu em...Cho dù ở vũ trụ nào anh vẫn yêu em';
-const customMessages = urlParams.get('messages') ? urlParams.get('messages').split('|') : [
+const mainText = decodeURIComponent(urlParams.get('mainText') || 'I love you in every universe');
+const subText = decodeURIComponent(urlParams.get('subText') || 'Anh yêu em...Cho dù ở vũ trụ nào anh vẫn yêu em');
+const customMessages = urlParams.get('messages') ? decodeURIComponent(urlParams.get('messages')).split('|') : [
   "Em là vũ trụ của anh",
   "Tình yêu bất tận giữa các vì sao",
   "Em là ngôi sao sáng nhất",
   "Anh tỏa sáng là vì em",
   "Em thật tỏa sáng trên bầu trời của anh"
 ];
+const imageParam = urlParams.get('images');
+const fallingImageData = imageParam ? JSON.parse(decodeURIComponent(imageParam)) : [];
+const fallingImages = [];
+
+const loadedFallingImages = [];
+fallingImageData.forEach(base64 => {
+  const img = new Image();
+  img.src = base64;
+  loadedFallingImages.push(img);
+});
+
 // Set main & sub text
 mainMessage.textContent = mainText;
 subtitle.textContent = subText;
 
 // 🎵 Set up music
 musicSource.src = selectedMusic;
-music.load(); // 🆕 Quan trọng để cập nhật nhạc mới
+music.load();
 
 const playMusicOnce = () => {
   music.play().catch(e => console.log("🎧 Music play blocked:", e));
   window.removeEventListener("click", playMusicOnce);
 };
-window.addEventListener("click", playMusicOnce); // Yêu cầu người dùng click mới được phát do chính sách trình duyệt
+window.addEventListener("click", playMusicOnce);
 
 const messages = customMessages;
 const fallingTexts = [];
@@ -35,11 +46,9 @@ const fallingTexts = [];
 function createFallingText() {
   const text = messages[Math.floor(Math.random() * messages.length)];
   const fontSize = Math.random() * 10 + 10;
-
   ctx.font = `bold ${fontSize}px Pacifico`;
   const textWidth = ctx.measureText(text).width;
-
-  const x = Math.random() * (width - textWidth); 
+  const x = Math.random() * (width - textWidth);
 
   fallingTexts.push({
     text,
@@ -49,6 +58,24 @@ function createFallingText() {
     alpha: 1,
     fontSize,
     hue: Math.random() * 360
+  });
+}
+
+function createFallingImage() {
+  if (loadedFallingImages.length === 0) return;
+  const img = loadedFallingImages[Math.floor(Math.random() * loadedFallingImages.length)];
+  const size = Math.random() * 30 + 30;
+  const x = Math.random() * (width - size);
+
+  fallingImages.push({
+    img,
+    x,
+    y: -size,
+    size,
+    speed: Math.random() * 2 + 2, // Match text speed
+    alpha: 1,
+    rotation: Math.random() * 360,
+    rotationSpeed: (Math.random() - 0.5) * 1
   });
 }
 
@@ -127,8 +154,13 @@ function createMeteor() {
 }
 
 setInterval(() => {
-  if (Math.random() < 0.8) createFallingText();
-}, 2000);
+  for (let i = 0; i < 2; i++) {
+    if (Math.random() < 0.95) createFallingText();
+  }
+}, 1700);
+setInterval(() => {
+  if (Math.random() < 0.7) createFallingImage();
+}, 1700); // Match text interval
 
 function animate() {
   ctx.clearRect(0, 0, width, height);
@@ -180,9 +212,25 @@ function animate() {
 
     t.y += t.speed;
     t.alpha -= 0.002;
-
     if (t.y > height + 30 || t.alpha <= 0) {
       fallingTexts.splice(i, 1);
+    }
+  });
+
+  fallingImages.forEach((imgObj, i) => {
+    ctx.save();
+    ctx.globalAlpha = imgObj.alpha;
+    ctx.translate(imgObj.x + imgObj.size / 2, imgObj.y + imgObj.size / 2);
+    ctx.rotate(imgObj.rotation * Math.PI / 180);
+    ctx.drawImage(imgObj.img, -imgObj.size / 2, -imgObj.size / 2, imgObj.size, imgObj.size);
+    ctx.restore();
+
+    imgObj.y += imgObj.speed;
+    imgObj.alpha -= 0.002; // Match text fade
+    imgObj.rotation += imgObj.rotationSpeed;
+
+    if (imgObj.y > height + imgObj.size || imgObj.alpha <= 0) {
+      fallingImages.splice(i, 1);
     }
   });
 
