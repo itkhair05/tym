@@ -3,6 +3,7 @@ from flask_cors import CORS
 import qrcode, base64, string, random, json, os
 from io import BytesIO
 from datetime import datetime, timedelta
+import os
 
 app = Flask(__name__, static_folder='static', template_folder='templates')
 
@@ -84,4 +85,5 @@ def access_qr(token):
     return redirect(entry['url'])
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=10000)
+    port = int(os.environ.get("PORT", 10000))
+    app.run(host="0.0.0.0", port=port)
