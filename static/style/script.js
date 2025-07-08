@@ -3,36 +3,52 @@ const musicSource = document.getElementById("music-source");
 const mainMessage = document.getElementById("main-message");
 const subtitle = document.getElementById("subtitle");
 
-// Parse query parameters
 const urlParams = new URLSearchParams(window.location.search);
-const selectedMusic = urlParams.get('music') || '/static/style/phepmau.mp3';
-const mainText = decodeURIComponent(urlParams.get('mainText') || 'I love you in every universe');
-const subText = decodeURIComponent(urlParams.get('subText') || 'Anh yêu em...Cho dù ở vũ trụ nào anh vẫn yêu em');
-const customMessages = urlParams.get('messages') ? decodeURIComponent(urlParams.get('messages')).split('|') : [
+const token = window.location.pathname.split('/').pop();
+
+let selectedMusic = '/static/style/phepmau.mp3';
+let mainText = 'I love you in every universe';
+let subText = 'Anh yêu em...Cho dù ở vũ trụ nào anh vẫn yêu em';
+let customMessages = [
   "Em là vũ trụ của anh",
   "Tình yêu bất tận giữa các vì sao",
   "Em là ngôi sao sáng nhất",
   "Anh tỏa sáng là vì em",
   "Em thật tỏa sáng trên bầu trời của anh"
 ];
-const imageParam = urlParams.get('images');
-const fallingImageData = imageParam ? JSON.parse(decodeURIComponent(imageParam)) : [];
-const fallingImages = [];
+let fallingImageData = [];
+let loadedFallingImages = [];
 
-const loadedFallingImages = [];
-fallingImageData.forEach(base64 => {
-  const img = new Image();
-  img.src = base64;
-  loadedFallingImages.push(img);
-});
+async function loadTokenData() {
+  try {
+    const res = await fetch(`/token-data/${token}`);
+    if (!res.ok) throw new Error("Token expired hoặc không tồn tại");
 
-// Set main & sub text
-mainMessage.textContent = mainText;
-subtitle.textContent = subText;
+    const data = await res.json();
+    selectedMusic = data.music || selectedMusic;
+    mainText = data.mainText || mainText;
+    subText = data.subText || subText;
+    customMessages = data.messages || customMessages;
+    fallingImageData = data.images || [];
 
-// 🎵 Set up music
-musicSource.src = selectedMusic;
-music.load();
+    mainMessage.textContent = mainText;
+    subtitle.textContent = subText;
+    musicSource.src = selectedMusic;
+    music.load();
+
+    // Load hình ảnh
+    fallingImageData.forEach(base64 => {
+      const img = new Image();
+      img.src = base64;
+      loadedFallingImages.push(img);
+    });
+
+    setup(); // Gọi animation sau khi dữ liệu đã sẵn sàng
+  } catch (err) {
+    alert("Lỗi khi tải dữ liệu token. Hãy tạo QR mới.");
+    console.error(err);
+  }
+}
 
 const playMusicOnce = () => {
   music.play().catch(e => console.log("🎧 Music play blocked:", e));
@@ -337,6 +353,10 @@ window.addEventListener('resize', () => {
 
 setInterval(() => { if (Math.random() < 0.7) createMeteor(); }, 3000);
 
-createHeartStars();
-createBackgroundStars();
-animate();
+function setup() {
+  createHeartStars();
+  createBackgroundStars();
+  animate();
+}
+
+loadTokenData();
