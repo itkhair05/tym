@@ -3,58 +3,31 @@ const musicSource = document.getElementById("music-source");
 const mainMessage = document.getElementById("main-message");
 const subtitle = document.getElementById("subtitle");
 
+// Parse query parameters
 const urlParams = new URLSearchParams(window.location.search);
-const token = window.location.pathname.split('/').pop();
-
-let selectedMusic = '/static/style/phepmau.mp3';
-let mainText = 'I love you in every universe';
-let subText = 'Anh yêu em...Cho dù ở vũ trụ nào anh vẫn yêu em';
-let customMessages = [
+const selectedMusic = urlParams.get('music') || '/static/style/phepmau.mp3';
+const mainText = urlParams.get('mainText') || 'I love you in every universe';
+const subText = urlParams.get('subText') || 'Anh yêu em...Cho dù ở vũ trụ nào anh vẫn yêu em';
+const customMessages = urlParams.get('messages') ? urlParams.get('messages').split('|') : [
   "Em là vũ trụ của anh",
   "Tình yêu bất tận giữa các vì sao",
   "Em là ngôi sao sáng nhất",
   "Anh tỏa sáng là vì em",
   "Em thật tỏa sáng trên bầu trời của anh"
 ];
-let fallingImageData = [];
-let loadedFallingImages = [];
+// Set main & sub text
+mainMessage.textContent = mainText;
+subtitle.textContent = subText;
 
-async function loadTokenData() {
-  try {
-    const res = await fetch(`/token-data/${token}`);
-    if (!res.ok) throw new Error("Token expired hoặc không tồn tại");
-
-    const data = await res.json();
-    selectedMusic = data.music || selectedMusic;
-    mainText = data.mainText || mainText;
-    subText = data.subText || subText;
-    customMessages = data.messages || customMessages;
-    fallingImageData = data.images || [];
-
-    mainMessage.textContent = mainText;
-    subtitle.textContent = subText;
-    musicSource.src = selectedMusic;
-    music.load();
-
-    // Load hình ảnh
-    fallingImageData.forEach(base64 => {
-      const img = new Image();
-      img.src = base64;
-      loadedFallingImages.push(img);
-    });
-
-    setup(); // Gọi animation sau khi dữ liệu đã sẵn sàng
-  } catch (err) {
-    alert("Lỗi khi tải dữ liệu token. Hãy tạo QR mới.");
-    console.error(err);
-  }
-}
+// 🎵 Set up music
+musicSource.src = selectedMusic;
+music.load(); // 🆕 Quan trọng để cập nhật nhạc mới
 
 const playMusicOnce = () => {
   music.play().catch(e => console.log("🎧 Music play blocked:", e));
   window.removeEventListener("click", playMusicOnce);
 };
-window.addEventListener("click", playMusicOnce);
+window.addEventListener("click", playMusicOnce); // Yêu cầu người dùng click mới được phát do chính sách trình duyệt
 
 const messages = customMessages;
 const fallingTexts = [];
@@ -62,9 +35,11 @@ const fallingTexts = [];
 function createFallingText() {
   const text = messages[Math.floor(Math.random() * messages.length)];
   const fontSize = Math.random() * 10 + 10;
+
   ctx.font = `bold ${fontSize}px Pacifico`;
   const textWidth = ctx.measureText(text).width;
-  const x = Math.random() * (width - textWidth);
+
+  const x = Math.random() * (width - textWidth); 
 
   fallingTexts.push({
     text,
@@ -74,24 +49,6 @@ function createFallingText() {
     alpha: 1,
     fontSize,
     hue: Math.random() * 360
-  });
-}
-
-function createFallingImage() {
-  if (loadedFallingImages.length === 0) return;
-  const img = loadedFallingImages[Math.floor(Math.random() * loadedFallingImages.length)];
-  const size = Math.random() * 30 + 30;
-  const x = Math.random() * (width - size);
-
-  fallingImages.push({
-    img,
-    x,
-    y: -size,
-    size,
-    speed: Math.random() * 2 + 2, // Match text speed
-    alpha: 1,
-    rotation: Math.random() * 360,
-    rotationSpeed: (Math.random() - 0.5) * 1
   });
 }
 
@@ -170,13 +127,8 @@ function createMeteor() {
 }
 
 setInterval(() => {
-  for (let i = 0; i < 2; i++) {
-    if (Math.random() < 0.95) createFallingText();
-  }
+  if (Math.random() < 0.9) createFallingText();
 }, 1700);
-setInterval(() => {
-  if (Math.random() < 0.7) createFallingImage();
-}, 1700); // Match text interval
 
 function animate() {
   ctx.clearRect(0, 0, width, height);
@@ -228,25 +180,9 @@ function animate() {
 
     t.y += t.speed;
     t.alpha -= 0.002;
+
     if (t.y > height + 30 || t.alpha <= 0) {
       fallingTexts.splice(i, 1);
-    }
-  });
-
-  fallingImages.forEach((imgObj, i) => {
-    ctx.save();
-    ctx.globalAlpha = imgObj.alpha;
-    ctx.translate(imgObj.x + imgObj.size / 2, imgObj.y + imgObj.size / 2);
-    ctx.rotate(imgObj.rotation * Math.PI / 180);
-    ctx.drawImage(imgObj.img, -imgObj.size / 2, -imgObj.size / 2, imgObj.size, imgObj.size);
-    ctx.restore();
-
-    imgObj.y += imgObj.speed;
-    imgObj.alpha -= 0.002; // Match text fade
-    imgObj.rotation += imgObj.rotationSpeed;
-
-    if (imgObj.y > height + imgObj.size || imgObj.alpha <= 0) {
-      fallingImages.splice(i, 1);
     }
   });
 
@@ -353,10 +289,6 @@ window.addEventListener('resize', () => {
 
 setInterval(() => { if (Math.random() < 0.7) createMeteor(); }, 3000);
 
-function setup() {
-  createHeartStars();
-  createBackgroundStars();
-  animate();
-}
-
-loadTokenData();
+createHeartStars();
+createBackgroundStars();
+animate();

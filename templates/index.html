@@ -7,13 +7,14 @@
   <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Poppins:wght@300;400;600;700&family=Great+Vibes&family=Dancing+Script:wght@400;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/static/style/input.css" />
   <!-- Google tag (gtag.js) -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-GRH4K0FDWE"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-GRH4K0FDWE');
-  </script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-GRH4K0FDWE"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-GRH4K0FDWE');
+</script>
 </head>
 <body>
   <div class="cosmic-bg">
@@ -60,15 +61,10 @@
     <div class="form-group">
       <label for="messages">Tin nhắn bay xuống:</label>
       <textarea id="messages" name="messages" rows="5" placeholder="Nụ cười em thắp sáng thế giới của anh ✨
-Mỗi nhịp tim gọi tên em 💕
-Em là mãi mãi của anh 💖
-Trong ánh mắt em, anh thấy mái nhà 🏠
-Chúng ta viết nên chuyện tình yêu của riêng mình 📖"></textarea>
-    </div>
-    <div class="form-group">
-      <label for="images">Chọn ảnh để rơi xuống (tối đa 3 ảnh PNG/JPG):</label>
-      <input type="file" id="images" name="images" accept="image/png,image/jpeg" multiple />
-      <p class="image-note" style="font-size: 0.9em; color: #ccc;">Chọn tối đa 3 ảnh (PNG hoặc JPG)</p>
+    Mỗi nhịp tim gọi tên em 💕
+    Em là mãi mãi của anh 💖
+    Trong ánh mắt em, anh thấy mái nhà 🏠
+    Chúng ta viết nên chuyện tình yêu của riêng mình 📖"></textarea>
     </div>
     
     <button class="generate-btn" onclick="generateQR()">Tạo Mã QR Tình Yêu</button>
@@ -89,45 +85,37 @@ Chúng ta viết nên chuyện tình yêu của riêng mình 📖"></textarea>
       const messagesInput = document.getElementById('messages').value.split('\n').filter(m => m.trim()).slice(0, 5);
       const messages = encodeURIComponent(messagesInput.join('|'));
 
-      const imageFiles = document.getElementById('images').files;
-      if (imageFiles.length > 3) {
-        alert('Vui lòng chỉ chọn tối đa 3 ảnh!');
-        return;
-      }
+      const url = `${window.location.origin}/heart.html?music=${encodeURIComponent(music)}&mainText=${mainText}&subText=${subText}&messages=${messages}`;
 
-      const imageBase64 = await encodeImagesToBase64(imageFiles);
-      const images = encodeURIComponent(JSON.stringify(imageBase64));
-      const baseURL = "https://tym-love-univers.onrender.com";
-      const url = `${baseURL}/heart.html?music=${encodeURIComponent(music)}&mainText=${mainText}&subText=${subText}&messages=${messages}&images=${images}`;
-
-
+      
       console.log("🔗 URL trong mã QR:", url);
 
       document.getElementById('loading').style.display = 'block';
       document.getElementById('qr-code').innerHTML = '';
 
       try {
-        const response = await fetch(`https://tym-love-univers.onrender.com/generate-qr`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ url })
-        });
+  const response = await fetch(`https://tym-love-univers.onrender.com/generate-qr`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ url })
+  });
 
-        const text = await response.text(); // lấy dạng text trước
-        console.log("📦 Raw response:", text);
+  const text = await response.text(); // lấy dạng text trước
+  console.log("📦 Raw response:", text);
 
-        const data = JSON.parse(text); // tự parse để dễ debug
+  const data = JSON.parse(text); // tự parse để dễ debug
 
-        document.getElementById('loading').style.display = 'none';
-        document.getElementById('qr-code').innerHTML = `
-          <img src="${data.qr}" alt="Mã QR">
-          <div class="qr-success">Thông điệp của bạn đã sẵn sàng! 💕</div>
-        `;
-      } catch (error) {
-        console.error('Lỗi tạo mã QR:', error);
-        document.getElementById('loading').style.display = 'none';
-        document.getElementById('qr-code').innerHTML = '<p style="color: #ff6b6b; font-family: \'Great Vibes\', cursive; font-size: 1.2em;">Rất tiếc! Có lỗi xảy ra. Vui lòng thử lại 💔</p>';
-      }
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('qr-code').innerHTML = `
+    <img src="${data.qr}" alt="Mã QR">
+    <div class="qr-success">Thông điệp của bạn đã sẵn sàng! 💕</div>
+  `;
+} catch (error) {
+  console.error('Lỗi tạo mã QR:', error);
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('qr-code').innerHTML = '<p style="color: #ff6b6b; font-family: \'Great Vibes\', cursive; font-size: 1.2em;">Rất tiếc! Có lỗi xảy ra. Vui lòng thử lại 💔</p>';
+}
+
     }
 
     document.addEventListener('DOMContentLoaded', function() {
@@ -141,33 +129,7 @@ Chúng ta viết nên chuyện tình yêu của riêng mình 📖"></textarea>
           this.style.transform = 'translateY(0)';
         });
       });
-
-      // Restrict file input to max 3 images
-      const imageInput = document.getElementById('images');
-      imageInput.addEventListener('change', function() {
-        if (this.files.length > 3) {
-          alert('Vui lòng chỉ chọn tối đa 3 ảnh!');
-          this.value = '';
-        }
-      });
     });
-
-    async function encodeImagesToBase64(files) {
-      const results = [];
-      for (const file of files) {
-        if (!['image/png', 'image/jpeg'].includes(file.type)) {
-          alert('Vui lòng chỉ chọn ảnh định dạng PNG hoặc JPG!');
-          throw new Error('Invalid file format');
-        }
-        const reader = new FileReader();
-        const result = await new Promise(resolve => {
-          reader.onload = () => resolve(reader.result);
-          reader.readAsDataURL(file);
-        });
-        results.push(result);
-      }
-      return results;
-    }
   </script>
 </body>
 </html>
