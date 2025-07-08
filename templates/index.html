@@ -97,7 +97,9 @@ Chúng ta viết nên chuyện tình yêu của riêng mình 📖"></textarea>
 
       const imageBase64 = await encodeImagesToBase64(imageFiles);
       const images = encodeURIComponent(JSON.stringify(imageBase64));
-      const url = `${window.location.origin}/heart.html?music=${encodeURIComponent(music)}&mainText=${mainText}&subText=${subText}&messages=${messages}&images=${images}`;
+      const baseURL = "https://tym-love-univers.onrender.com";
+      const url = `${baseURL}/heart.html?music=${encodeURIComponent(music)}&mainText=${mainText}&subText=${subText}&messages=${messages}&images=${images}`;
+
 
       console.log("🔗 URL trong mã QR:", url);
 
